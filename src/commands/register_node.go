@@ -33,6 +33,12 @@ func RegisterHostWithRetry() {
 			CurrentHost = registerResult.Payload
 			return
 		}
+		// stop register in case of forbidden reply.
+		if _, ok := err.(*installer.RegisterHostForbidden); ok {
+			s.Logger().Warn("Host will stop trying to register")
+			// wait forever
+			select{}
+		}
 		s.Logger().Warnf("Error registering host: %s", err.Error())
 		time.Sleep(time.Duration(config.GlobalAgentConfig.IntervalSecs) * time.Second)
 	}
